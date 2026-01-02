@@ -18,14 +18,15 @@ export function getCurrentMonthBalance(loan: LoanData, settings: Settings, curre
 
 export function getYearEndBalance(loan: LoanData, settings: Settings): number {
     // If currentOpenCapital is set, use it as the starting point
-    // and only subtract payments from current month onwards
+    // and only subtract payments from NEXT month onwards
     if (settings.currentOpenCapital > 0) {
         const currentDate = new Date();
         const currentMonthIndex = currentDate.getMonth();
         let balance = settings.currentOpenCapital;
 
-        // Subtract principal payments from current month to end of year
-        for (let i = currentMonthIndex; i < MONTHS.length; i++) {
+        // Subtract principal payments from NEXT month to end of year
+        // (currentOpenCapital already reflects the current month)
+        for (let i = currentMonthIndex + 1; i < MONTHS.length; i++) {
             const payment = loan.monthlyPayments[MONTHS[i]];
             if (payment && payment.principal) {
                 balance -= payment.principal;

@@ -1,7 +1,7 @@
 import { Component } from '../../core/Component';
 import type { EventBus } from '../../core/EventBus';
 import { createElement } from '../../core/DOMHelpers';
-import { formatNumberInput } from '../../utils/inputFormatters';
+import { formatNumberInput, parseFormattedNumber, formatToEuropean } from '../../utils/inputFormatters';
 
 export interface MonthCardConfig {
     month: string;
@@ -24,10 +24,8 @@ export class MonthCard extends Component {
 
         const title = createElement('h3', '', this.config.month);
         this.input = document.createElement('input');
-        this.input.type = 'number';
+        this.input.type = 'text';
         this.input.placeholder = this.config.placeholder || 'Amount saved';
-        this.input.min = '0';
-        this.input.step = '0.01';
 
         if (this.config.value !== undefined && this.config.value !== 0) {
             this.input.value = this.config.value.toString();
@@ -37,8 +35,8 @@ export class MonthCard extends Component {
         formatNumberInput(this.input);
 
         this.input.addEventListener('input', () => {
-            const value = parseFloat(this.input!.value);
-            this.config.onChange(isNaN(value) ? 0 : value);
+            const value = parseFormattedNumber(this.input!.value);
+            this.config.onChange(value);
         });
 
         card.appendChild(title);
@@ -49,11 +47,15 @@ export class MonthCard extends Component {
 
     setValue(value: number): void {
         if (this.input) {
-            this.input.value = value > 0 ? value.toString() : '';
+            if (value > 0) {
+                this.input.value = formatToEuropean(value);
+            } else {
+                this.input.value = '';
+            }
         }
     }
 
     getValue(): number {
-        return this.input ? (parseFloat(this.input.value) || 0) : 0;
+        return this.input ? parseFormattedNumber(this.input.value) : 0;
     }
 }

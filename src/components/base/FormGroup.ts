@@ -1,7 +1,7 @@
 import { Component } from '../../core/Component';
 import type { EventBus } from '../../core/EventBus';
 import { createElement } from '../../core/DOMHelpers';
-import { formatNumberInput } from '../../utils/inputFormatters';
+import { formatNumberInput, parseFormattedNumber, formatToEuropean } from '../../utils/inputFormatters';
 
 export interface FormGroupConfig {
     label: string;
@@ -33,14 +33,18 @@ export class FormGroup extends Component {
         label.textContent = this.config.label;
 
         this.input = document.createElement('input');
-        this.input.type = this.config.inputType;
+        // Use text input for numbers to support European formatting
+        this.input.type = this.config.inputType === 'number' ? 'text' : this.config.inputType;
         this.input.id = this.config.inputId;
 
         if (this.config.inputType !== 'checkbox') {
             if (this.config.placeholder) this.input.placeholder = this.config.placeholder;
-            if (this.config.min) this.input.min = this.config.min;
-            if (this.config.max) this.input.max = this.config.max;
-            if (this.config.step) this.input.step = this.config.step;
+            // Don't set min/max/step for text inputs
+            if (this.config.inputType !== 'number') {
+                if (this.config.min) this.input.min = this.config.min;
+                if (this.config.max) this.input.max = this.config.max;
+                if (this.config.step) this.input.step = this.config.step;
+            }
 
             if (this.config.value !== undefined) {
                 this.input.value = this.config.value.toString();
@@ -53,7 +57,7 @@ export class FormGroup extends Component {
 
             this.input.addEventListener('input', () => {
                 const value = this.config.inputType === 'number'
-                    ? (parseFloat(this.input!.value) || 0)
+                    ? parseFormattedNumber(this.input!.value)
                     : this.input!.value;
                 this.config.onChange(value);
             });
@@ -81,6 +85,13 @@ export class FormGroup extends Component {
 
         if (this.config.inputType === 'checkbox') {
             this.input.checked = value as boolean;
+        } else if (this.config.inputType === 'number') {
+            const numValue = value as number;
+            if (!isNaN(numValue) && numValue !== 0) {
+                this.input.value = formatToEuropean(numValue);
+            } else {
+                this.input.value = '';
+            }
         } else {
             this.input.value = value.toString();
         }
@@ -92,7 +103,7 @@ export class FormGroup extends Component {
         if (this.config.inputType === 'checkbox') {
             return this.input.checked;
         } else if (this.config.inputType === 'number') {
-            return parseFloat(this.input.value) || 0;
+            return parseFormattedNumber(this.input.value);
         } else {
             return this.input.value;
         }

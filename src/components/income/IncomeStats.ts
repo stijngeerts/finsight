@@ -25,6 +25,8 @@ export class IncomeStats extends Component {
 
         this.subscribe(AppEvents.INCOME_UPDATED, () => this.updateStats());
         this.subscribe(AppEvents.SETTINGS_UPDATED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_IMPORTED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_RESET, () => this.updateStats());
     }
 
     render(): HTMLElement {

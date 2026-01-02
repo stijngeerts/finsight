@@ -24,6 +24,8 @@ export class SavingsStats extends Component {
 
         this.subscribe(AppEvents.SAVINGS_UPDATED, () => this.updateStats());
         this.subscribe(AppEvents.SETTINGS_UPDATED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_IMPORTED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_RESET, () => this.updateStats());
     }
 
     render(): HTMLElement {

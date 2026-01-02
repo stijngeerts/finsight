@@ -12,6 +12,7 @@ import { AppEvents } from '../../types';
 export class RealEstatePage extends Component {
     private stateManager: StateManager;
     private netProceedsCard: StatCard;
+    private formGroups: Map<string, FormGroup> = new Map();
 
     constructor(eventBus: EventBus, stateManager: StateManager) {
         super(eventBus);
@@ -27,6 +28,8 @@ export class RealEstatePage extends Component {
         this.subscribe(AppEvents.REAL_ESTATE_UPDATED, () => this.updateNetProceeds());
         this.subscribe(AppEvents.LOAN_UPDATED, () => this.updateNetProceeds());
         this.subscribe(AppEvents.SETTINGS_UPDATED, () => this.updateNetProceeds());
+        this.subscribe(AppEvents.DATA_IMPORTED, () => this.updateAllFields());
+        this.subscribe(AppEvents.DATA_RESET, () => this.updateAllFields());
     }
 
     render(): HTMLElement {
@@ -45,17 +48,19 @@ export class RealEstatePage extends Component {
             placeholder: 'My Apartment',
             onChange: (value) => this.updateRealEstate({ name: value as string })
         });
+        this.formGroups.set('realEstateName', propertyName);
 
         const sellingPrice = new FormGroup(this.eventBus, {
             label: 'Selling Price (€)',
             inputId: 'sellingPrice',
             inputType: 'number',
             value: realEstate?.sellingPrice || 0,
-            placeholder: '250000',
+            placeholder: '250.000,00',
             min: '0',
             step: '100',
             onChange: (value) => this.updateRealEstate({ sellingPrice: value as number })
         });
+        this.formGroups.set('sellingPrice', sellingPrice);
 
         propertyName.mount(formRow1);
         sellingPrice.mount(formRow1);
@@ -66,23 +71,25 @@ export class RealEstatePage extends Component {
             inputId: 'brokerFeePercentage',
             inputType: 'number',
             value: realEstate?.brokerFeePercentage || 0,
-            placeholder: '3',
+            placeholder: '3,00',
             min: '0',
             max: '100',
             step: '0.1',
             onChange: (value) => this.updateRealEstate({ brokerFeePercentage: value as number })
         });
+        this.formGroups.set('brokerFeePercentage', brokerFee);
 
         const earlyFine = new FormGroup(this.eventBus, {
             label: 'Early Repayment Fine (€)',
             inputId: 'earlyRepaymentFine',
             inputType: 'number',
             value: realEstate?.earlyRepaymentFine || 0,
-            placeholder: '5000',
+            placeholder: '5.000,00',
             min: '0',
             step: '100',
             onChange: (value) => this.updateRealEstate({ earlyRepaymentFine: value as number })
         });
+        this.formGroups.set('earlyRepaymentFine', earlyFine);
 
         brokerFee.mount(formRow2);
         earlyFine.mount(formRow2);
@@ -131,5 +138,16 @@ export class RealEstatePage extends Component {
         const netValue = calculateNetValue(realEstate, loanBalance);
 
         this.netProceedsCard.updateValue(formatCurrency(netValue));
+    }
+
+    private updateAllFields(): void {
+        const realEstate = this.stateManager.getRealEstate();
+
+        this.formGroups.get('realEstateName')?.setValue(realEstate?.name || '');
+        this.formGroups.get('sellingPrice')?.setValue(realEstate?.sellingPrice || 0);
+        this.formGroups.get('brokerFeePercentage')?.setValue(realEstate?.brokerFeePercentage || 0);
+        this.formGroups.get('earlyRepaymentFine')?.setValue(realEstate?.earlyRepaymentFine || 0);
+
+        this.updateNetProceeds();
     }
 }

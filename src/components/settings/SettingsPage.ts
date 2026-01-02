@@ -12,12 +12,17 @@ import { MONTHS } from '../../constants';
 export class SettingsPage extends Component {
     private stateManager: StateManager;
     private resetModal: ResetModal;
+    private formGroups: Map<string, FormGroup> = new Map();
 
     constructor(eventBus: EventBus, stateManager: StateManager) {
         super(eventBus);
         this.stateManager = stateManager;
 
         this.resetModal = new ResetModal(eventBus, () => this.handleReset());
+
+        // Subscribe to data import/reset events to update form values
+        this.subscribe(AppEvents.DATA_IMPORTED, () => this.updateAllFields());
+        this.subscribe(AppEvents.DATA_RESET, () => this.updateAllFields());
     }
 
     render(): HTMLElement {
@@ -50,22 +55,24 @@ export class SettingsPage extends Component {
             inputId: 'totalWealthGoal',
             inputType: 'number',
             value: settings.totalWealthGoal,
-            placeholder: '500000',
-            min: '0',
-            step: '1000',
+            placeholder: '500.000,00',
+            min: '0,00',
+            step: '1000,00',
             onChange: (value) => this.stateManager.updateSettings({ totalWealthGoal: value as number })
         });
+        this.formGroups.set('totalWealthGoal', wealthGoal);
 
         const savingsGoal = new FormGroup(this.eventBus, {
             label: 'Savings Goal for 2026 (€)',
             inputId: 'savingsGoalYear',
             inputType: 'number',
             value: settings.savingsGoalYear,
-            placeholder: '50000',
-            min: '0',
-            step: '1000',
+            placeholder: '50.000,00',
+            min: '0,00',
+            step: '1000,00',
             onChange: (value) => this.stateManager.updateSettings({ savingsGoalYear: value as number })
         });
+        this.formGroups.set('savingsGoalYear', savingsGoal);
 
         wealthGoal.mount(formRow);
         savingsGoal.mount(formRow);
@@ -85,25 +92,27 @@ export class SettingsPage extends Component {
             inputId: 'currentSavingsAmount',
             inputType: 'number',
             value: settings.currentSavingsAmount,
-            placeholder: '10000',
-            min: '0',
-            step: '100',
+            placeholder: '10.000,00',
+            min: '0,00',
+            step: '100,00',
             onChange: (value) => this.stateManager.updateSettings({ currentSavingsAmount: value as number })
         });
+        this.formGroups.set('currentSavingsAmount', currentSavings);
 
         const totalLoan = new FormGroup(this.eventBus, {
             label: 'Total Loan Amount (€)',
             inputId: 'settingsTotalLoanAmount',
             inputType: 'number',
             value: settings.totalLoanAmount,
-            placeholder: '200000',
-            min: '0',
-            step: '1000',
+            placeholder: '200.000,00',
+            min: '0,00',
+            step: '1000,00',
             onChange: (value) => {
                 this.stateManager.updateSettings({ totalLoanAmount: value as number });
                 this.stateManager.updateLoan({ totalLoaned: value as number });
             }
         });
+        this.formGroups.set('settingsTotalLoanAmount', totalLoan);
 
         currentSavings.mount(formRow);
         totalLoan.mount(formRow);
@@ -115,12 +124,13 @@ export class SettingsPage extends Component {
             inputId: 'currentOpenCapital',
             inputType: 'number',
             value: settings.currentOpenCapital,
-            placeholder: '180000',
-            min: '0',
-            step: '1000',
+            placeholder: '180.000,00',
+            min: '0,00',
+            step: '1000,00',
             helpText: 'The current outstanding loan balance',
             onChange: (value) => this.stateManager.updateSettings({ currentOpenCapital: value as number })
         });
+        this.formGroups.set('currentOpenCapital', openCapital);
 
         openCapital.mount(formRow2);
 
@@ -140,22 +150,24 @@ export class SettingsPage extends Component {
             inputId: 'expectedDividends',
             inputType: 'number',
             value: settings.expectedDividends,
-            placeholder: '5000',
-            min: '0',
-            step: '100',
+            placeholder: '5.000,00',
+            min: '0,00',
+            step: '100,00',
             onChange: (value) => this.stateManager.updateSettings({ expectedDividends: value as number })
         });
+        this.formGroups.set('expectedDividends', dividends);
 
         const debtCollection = new FormGroup(this.eventBus, {
             label: 'Expected Debt Collection (€)',
             inputId: 'expectedDebtCollection',
             inputType: 'number',
             value: settings.expectedDebtCollection,
-            placeholder: '2000',
-            min: '0',
-            step: '100',
+            placeholder: '2.000,00',
+            min: '0,00',
+            step: '100,00',
             onChange: (value) => this.stateManager.updateSettings({ expectedDebtCollection: value as number })
         });
+        this.formGroups.set('expectedDebtCollection', debtCollection);
 
         dividends.mount(formRow);
         debtCollection.mount(formRow);
@@ -178,15 +190,16 @@ export class SettingsPage extends Component {
             placeholder: 'Person 1',
             onChange: (value) => this.stateManager.updateSettings({ person1Name: value as string })
         });
+        this.formGroups.set('person1Name', p1Name);
 
         const p1Income = new FormGroup(this.eventBus, {
             label: 'Person 1 Monthly Income (€)',
             inputId: 'person1DefaultIncome',
             inputType: 'number',
             value: settings.person1DefaultIncome,
-            placeholder: '3000',
-            min: '0',
-            step: '100',
+            placeholder: '3.000,00',
+            min: '0,00',
+            step: '100,00',
             onChange: (value) => {
                 const oldDefault = this.stateManager.getSettings().person1DefaultIncome;
                 this.stateManager.updateSettings({ person1DefaultIncome: value as number });
@@ -199,17 +212,19 @@ export class SettingsPage extends Component {
                 });
             }
         });
+        this.formGroups.set('person1DefaultIncome', p1Income);
 
         const p1Voucher = new FormGroup(this.eventBus, {
             label: 'Person 1 Meal Voucher (€/day)',
             inputId: 'person1MealVoucher',
             inputType: 'number',
             value: settings.person1MealVoucher,
-            placeholder: '10',
-            min: '0',
+            placeholder: '10,00',
+            min: '0,00',
             step: '0.50',
             onChange: (value) => this.stateManager.updateSettings({ person1MealVoucher: value as number })
         });
+        this.formGroups.set('person1MealVoucher', p1Voucher);
 
         p1Name.mount(person1Row);
         p1Income.mount(person1Row);
@@ -224,15 +239,16 @@ export class SettingsPage extends Component {
             placeholder: 'Person 2',
             onChange: (value) => this.stateManager.updateSettings({ person2Name: value as string })
         });
+        this.formGroups.set('person2Name', p2Name);
 
         const p2Income = new FormGroup(this.eventBus, {
             label: 'Person 2 Monthly Income (€)',
             inputId: 'person2DefaultIncome',
             inputType: 'number',
             value: settings.person2DefaultIncome,
-            placeholder: '2500',
-            min: '0',
-            step: '100',
+            placeholder: '2.500,00',
+            min: '0,00',
+            step: '100,00',
             onChange: (value) => {
                 const oldDefault = this.stateManager.getSettings().person2DefaultIncome;
                 this.stateManager.updateSettings({ person2DefaultIncome: value as number });
@@ -245,6 +261,7 @@ export class SettingsPage extends Component {
                 });
             }
         });
+        this.formGroups.set('person2DefaultIncome', p2Income);
 
         const p2Voucher = new FormGroup(this.eventBus, {
             label: 'Person 2 Meal Voucher (€/day)',
@@ -252,10 +269,11 @@ export class SettingsPage extends Component {
             inputType: 'number',
             value: settings.person2MealVoucher,
             placeholder: '6',
-            min: '0',
+            min: '0,00',
             step: '0.50',
             onChange: (value) => this.stateManager.updateSettings({ person2MealVoucher: value as number })
         });
+        this.formGroups.set('person2MealVoucher', p2Voucher);
 
         p2Name.mount(person2Row);
         p2Income.mount(person2Row);
@@ -277,24 +295,26 @@ export class SettingsPage extends Component {
             inputId: 'rentIncome',
             inputType: 'number',
             value: settings.rentIncome,
-            placeholder: '500',
-            min: '0',
+            placeholder: '500,00',
+            min: '0,00',
             step: '50',
             helpText: 'Rent received per month',
             onChange: (value) => this.stateManager.updateSettings({ rentIncome: value as number })
         });
+        this.formGroups.set('rentIncome', rentIncome);
 
         const utilitiesIncome = new FormGroup(this.eventBus, {
             label: 'Monthly Utilities Income (€)',
             inputId: 'utilitiesIncome',
             inputType: 'number',
             value: settings.utilitiesIncome,
-            placeholder: '150',
-            min: '0',
+            placeholder: '150,00',
+            min: '0,00',
             step: '10',
             helpText: 'Utilities reimbursement per month',
             onChange: (value) => this.stateManager.updateSettings({ utilitiesIncome: value as number })
         });
+        this.formGroups.set('utilitiesIncome', utilitiesIncome);
 
         rentIncome.mount(formRow);
         utilitiesIncome.mount(formRow);
@@ -314,22 +334,24 @@ export class SettingsPage extends Component {
             inputId: 'workingDaysPerYear',
             inputType: 'number',
             value: settings.workingDaysPerYear,
-            placeholder: '260',
-            min: '0',
+            placeholder: '260,00',
+            min: '0,00',
             step: '1',
             onChange: (value) => this.stateManager.updateSettings({ workingDaysPerYear: value as number })
         });
+        this.formGroups.set('workingDaysPerYear', workingDays);
 
         const holidays = new FormGroup(this.eventBus, {
             label: 'Holidays',
             inputId: 'holidays',
             inputType: 'number',
             value: settings.holidays,
-            placeholder: '20',
-            min: '0',
+            placeholder: '20,00',
+            min: '0,00',
             step: '1',
             onChange: (value) => this.stateManager.updateSettings({ holidays: value as number })
         });
+        this.formGroups.set('holidays', holidays);
 
         workingDays.mount(formRow);
         holidays.mount(formRow);
@@ -392,6 +414,29 @@ export class SettingsPage extends Component {
         }
 
         target.value = '';
+    }
+
+    private updateAllFields(): void {
+        const settings = this.stateManager.getSettings();
+
+        // Update all form fields with current state values
+        this.formGroups.get('totalWealthGoal')?.setValue(settings.totalWealthGoal);
+        this.formGroups.get('savingsGoalYear')?.setValue(settings.savingsGoalYear);
+        this.formGroups.get('currentSavingsAmount')?.setValue(settings.currentSavingsAmount);
+        this.formGroups.get('settingsTotalLoanAmount')?.setValue(settings.totalLoanAmount);
+        this.formGroups.get('currentOpenCapital')?.setValue(settings.currentOpenCapital);
+        this.formGroups.get('expectedDividends')?.setValue(settings.expectedDividends);
+        this.formGroups.get('expectedDebtCollection')?.setValue(settings.expectedDebtCollection);
+        this.formGroups.get('person1Name')?.setValue(settings.person1Name);
+        this.formGroups.get('person1DefaultIncome')?.setValue(settings.person1DefaultIncome);
+        this.formGroups.get('person1MealVoucher')?.setValue(settings.person1MealVoucher);
+        this.formGroups.get('person2Name')?.setValue(settings.person2Name);
+        this.formGroups.get('person2DefaultIncome')?.setValue(settings.person2DefaultIncome);
+        this.formGroups.get('person2MealVoucher')?.setValue(settings.person2MealVoucher);
+        this.formGroups.get('rentIncome')?.setValue(settings.rentIncome);
+        this.formGroups.get('utilitiesIncome')?.setValue(settings.utilitiesIncome);
+        this.formGroups.get('workingDaysPerYear')?.setValue(settings.workingDaysPerYear);
+        this.formGroups.get('holidays')?.setValue(settings.holidays);
     }
 
     private handleReset(): void {

@@ -61,19 +61,19 @@ export class HomePage extends Component {
         const initialSavings = createElement('div', 'breakdown-item');
         initialSavings.innerHTML = `
             <span class="breakdown-label">Initial Savings</span>
-            <span class="breakdown-value" id="initialSavings">€0.00</span>
+            <span class="breakdown-value" id="initialSavings">€0,00</span>
         `;
 
         const savingsYTD = createElement('div', 'breakdown-item');
         savingsYTD.innerHTML = `
             <span class="breakdown-label">Savings YTD</span>
-            <span class="breakdown-value" id="savingsYTD">€0.00</span>
+            <span class="breakdown-value" id="savingsYTD">€0,00</span>
         `;
 
         const netRealEstate = createElement('div', 'breakdown-item');
         netRealEstate.innerHTML = `
             <span class="breakdown-label">Net Real Estate Value</span>
-            <span class="breakdown-value" id="netRealEstate">€0.00</span>
+            <span class="breakdown-value" id="netRealEstate">€0,00</span>
         `;
 
         breakdownGrid.appendChild(initialSavings);
@@ -94,25 +94,25 @@ export class HomePage extends Component {
         const projInitial = createElement('div', 'breakdown-item');
         projInitial.innerHTML = `
             <span class="breakdown-label">Initial Savings</span>
-            <span class="breakdown-value" id="projInitialSavings">€0.00</span>
+            <span class="breakdown-value" id="projInitialSavings">€0,00</span>
         `;
 
         const projTotal = createElement('div', 'breakdown-item');
         projTotal.innerHTML = `
             <span class="breakdown-label">Total Savings (Full Year)</span>
-            <span class="breakdown-value" id="projTotalSavings">€0.00</span>
+            <span class="breakdown-value" id="projTotalSavings">€0,00</span>
         `;
 
         const projNet = createElement('div', 'breakdown-item');
         projNet.innerHTML = `
             <span class="breakdown-label">Net Real Estate (Year-End)</span>
-            <span class="breakdown-value" id="projNetRealEstate">€0.00</span>
+            <span class="breakdown-value" id="projNetRealEstate">€0,00</span>
         `;
 
         const projBusiness = createElement('div', 'breakdown-item');
         projBusiness.innerHTML = `
             <span class="breakdown-label">Income From Business</span>
-            <span class="breakdown-value" id="projectedBusinessIncome">€0.00</span>
+            <span class="breakdown-value" id="projectedBusinessIncome">€0,00</span>
         `;
 
         breakdownGrid.appendChild(projInitial);

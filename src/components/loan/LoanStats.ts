@@ -4,7 +4,7 @@ import type { StateManager } from '../../state/StateManager';
 import { StatCard } from '../base/StatCard';
 import { createElement } from '../../core/DOMHelpers';
 import { formatCurrency } from '../../utils/formatters';
-import { getCurrentMonthBalance, calculateTotalRepaid } from '../../services/LoanService';
+import { getCurrentMonthBalance, getYearEndBalance, calculateTotalRepaid } from '../../services/LoanService';
 import { AppEvents } from '../../types';
 
 export class LoanStats extends Component {
@@ -19,10 +19,12 @@ export class LoanStats extends Component {
 
         this.totalLoanCard = new StatCard(eventBus, { label: 'Total Loan Amount', value: formatCurrency(0) });
         this.currentBalanceCard = new StatCard(eventBus, { label: 'Current Balance', value: formatCurrency(0) });
-        this.totalRepaidCard = new StatCard(eventBus, { label: 'Total Repaid', value: formatCurrency(0) });
+        this.totalRepaidCard = new StatCard(eventBus, { label: 'Total Repaid by End of Year', value: formatCurrency(0) });
 
         this.subscribe(AppEvents.LOAN_UPDATED, () => this.updateStats());
         this.subscribe(AppEvents.SETTINGS_UPDATED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_IMPORTED, () => this.updateStats());
+        this.subscribe(AppEvents.DATA_RESET, () => this.updateStats());
     }
 
     render(): HTMLElement {
@@ -43,10 +45,11 @@ export class LoanStats extends Component {
         const currentMonth = this.stateManager.getCurrentMonth();
 
         const currentBalance = getCurrentMonthBalance(loan, settings, currentMonth);
-        const totalRepaid = calculateTotalRepaid(loan.totalLoaned, currentBalance);
+        const yearEndBalance = getYearEndBalance(loan, settings);
+        const totalRepaidByYearEnd = calculateTotalRepaid(loan.totalLoaned, yearEndBalance);
 
         this.totalLoanCard.updateValue(formatCurrency(loan.totalLoaned));
         this.currentBalanceCard.updateValue(formatCurrency(currentBalance));
-        this.totalRepaidCard.updateValue(formatCurrency(totalRepaid));
+        this.totalRepaidCard.updateValue(formatCurrency(totalRepaidByYearEnd));
     }
 }

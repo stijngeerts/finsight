@@ -2,7 +2,7 @@ import { Component } from '../../core/Component';
 import type { EventBus } from '../../core/EventBus';
 import type { StateManager } from '../../state/StateManager';
 import { createElement } from '../../core/DOMHelpers';
-import { formatNumberInput } from '../../utils/inputFormatters';
+import { formatNumberInput, parseFormattedNumber, formatToEuropean } from '../../utils/inputFormatters';
 import { MONTHS } from '../../constants';
 import { AppEvents } from '../../types';
 
@@ -37,11 +37,9 @@ export class IncomeGrid extends Component {
             const p1Group = createElement('div', 'input-group');
             const p1Label = createElement('label', '', settings.person1Name);
             const p1Input = document.createElement('input');
-            p1Input.type = 'number';
+            p1Input.type = 'text';
             p1Input.id = `person1Income${month}`;
-            p1Input.placeholder = '0.00';
-            p1Input.min = '0';
-            p1Input.step = '0.01';
+            p1Input.placeholder = '0,00';
             const p1Value = person1Income[month] || 0;
             if (p1Value > 0) p1Input.value = p1Value.toString();
             formatNumberInput(p1Input);
@@ -52,11 +50,9 @@ export class IncomeGrid extends Component {
             const p2Group = createElement('div', 'input-group');
             const p2Label = createElement('label', '', settings.person2Name);
             const p2Input = document.createElement('input');
-            p2Input.type = 'number';
+            p2Input.type = 'text';
             p2Input.id = `person2Income${month}`;
-            p2Input.placeholder = '0.00';
-            p2Input.min = '0';
-            p2Input.step = '0.01';
+            p2Input.placeholder = '0,00';
             const p2Value = person2Income[month] || 0;
             if (p2Value > 0) p2Input.value = p2Value.toString();
             formatNumberInput(p2Input);
@@ -69,12 +65,12 @@ export class IncomeGrid extends Component {
             card.appendChild(inputsDiv);
 
             p1Input.addEventListener('input', () => {
-                const value = parseFloat(p1Input.value) || 0;
+                const value = parseFormattedNumber(p1Input.value);
                 this.stateManager.updateIncome('person1', month, value);
             });
 
             p2Input.addEventListener('input', () => {
-                const value = parseFloat(p2Input.value) || 0;
+                const value = parseFormattedNumber(p2Input.value);
                 this.stateManager.updateIncome('person2', month, value);
             });
 
@@ -103,13 +99,13 @@ export class IncomeGrid extends Component {
             if (p1Input) {
                 const value = person1Income[month];
                 if (value !== undefined && value !== null) {
-                    p1Input.value = value > 0 ? value.toString() : '';
+                    p1Input.value = value > 0 ? formatToEuropean(value) : '';
                 }
             }
             if (p2Input) {
                 const value = person2Income[month];
                 if (value !== undefined && value !== null) {
-                    p2Input.value = value > 0 ? value.toString() : '';
+                    p2Input.value = value > 0 ? formatToEuropean(value) : '';
                 }
             }
         });
